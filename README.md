@@ -7,6 +7,7 @@ Requirements
 ------------
 
 **Wordpress 3.5**
+
 **WooCommerce 2.x**
 
 Installation
