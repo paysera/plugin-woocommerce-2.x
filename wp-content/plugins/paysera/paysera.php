@@ -144,6 +144,20 @@ function paysera_init() {
             }
         }
 
+        public function get_return_url( $order = null ) {
+            if ( $order ) {
+                $return_url = $order->get_checkout_order_received_url();
+            } else {
+                $return_url = wc_get_endpoint_url( 'order-received', '', wc_get_page_permalink( 'checkout' ) );
+            }
+
+            if ( is_ssl() || get_option('woocommerce_force_ssl_checkout') == 'yes' ) {
+                $return_url = str_replace( 'http:', 'https:', $return_url );
+            }
+
+            return apply_filters( 'woocommerce_get_return_url', $return_url );
+        }
+
         //Redirect to payment
         function process_payment($order_id) {
             global $woocommerce;
@@ -160,7 +174,7 @@ function paysera_init() {
                 'amount'        => intval(number_format($order->get_total(), 2, '', '')),
                 'currency'      => get_woocommerce_currency(),
                 'country'       => $order->billing_country,
-                'accepturl'     => add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(woocommerce_get_page_id('thanks')))),
+                'accepturl'     => esc_url( add_query_arg( 'utm_nooverride', '1', $this->get_return_url( $order ) ) ),
                 'cancelurl'     => $order->get_cancel_order_url(),
                 'callbackurl'   => trailingslashit(get_bloginfo('wpurl')) . '?wc-api=wc_gateway_paysera',
                 'p_firstname'   => $order->billing_first_name,
